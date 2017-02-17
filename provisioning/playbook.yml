@@ -1,0 +1,46 @@
+---
+- hosts: all
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Update apt cache if not done today
+      apt: update_cache=yes cache_valid_time=86400
+      become: yes
+      become_method: sudo
+    - name: Install Vim, Most, Tree, Git, Mercurial, Python Pip
+      apt: state=latest pkg=vim,most,tree,git,mercurial,python-pip
+      become: yes
+      become_method: sudo
+    - name: Install GCC cross compiler for ARM Cortex-A/R/M processors
+      apt: state=latest pkg=gcc-arm-none-eabi
+      become: yes
+      become_method: sudo
+    - name: Upgrade Pip if available
+      command: pip install --upgrade pip
+    - name: Install the ARM mbed command line interface
+      pip: name=mbed-cli
+      become: yes
+      become_method: sudo
+    - name: Creates a {{ source_dir }} directory for firmware
+      file: path={{ source_dir }} state=directory
+    - name: Import mbed-cloud-k64f-example-vagrant
+      shell: /usr/local/bin/mbed import "{{ repo_url }}" >> mbed-cli-import.log
+      args:
+        chdir: "{{ source_dir }}"
+        creates: mbed-cli-import.log
+    - name: Add mbed-os libraries
+      shell: /usr/local/bin/mbed add "{{ item }}"
+      with_items: "{{ mbed_os_libraries }}"
+      args:
+        chdir: "{{ source_dir }}/{{ repo_name }}"
+    - name: Pip install mbed OS requirements for mbed-cli
+      shell: pip install -r requirements.txt
+      become: yes
+      become_method: sudo
+      args:
+        chdir: "{{ source_dir }}/{{ repo_name }}/mbed-os"
+    - name: Compile {{ repo_name }} for FRDM-K64F using GCC_ARM compiler
+      shell: /usr/local/bin/mbed compile -m K64F -t GCC_ARM -c >> mbed-cli-compile.log
+      args:
+        chdir: "{{ source_dir }}/{{ repo_name }}"
+        creates: mbed-cli-compile.log

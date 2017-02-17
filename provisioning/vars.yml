@@ -1,0 +1,13 @@
+mbed_os_libraries:
+  - https://developer.mbed.org/users/sam_grove/code/BufferedSerial
+  - https://developer.mbed.org/teams/Freescale/code/FXOS8700Q
+  - https://developer.mbed.org/users/danielashercohen/code/SeeedGrayOLED
+  - https://github.com/ARMmbed/mbed-os
+  - https://github.com/ARMmbed/mbed-cloud-client
+
+home_dir: /vagrant_home
+source_dir: "{{ home_dir }}/Source/my_vagrant_instance"
+repo_name: "mbed-cloud-k64f-example"
+repo_url: "https://github.com/dlfryar/{{ repo_name }}"
+mbed_cli: "/usr/local/bin/mbed"
+
